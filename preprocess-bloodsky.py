@@ -12,23 +12,28 @@ args = parser.parse_args()
 
 df = pd.read_csv(args.input, dtype=dtypes.get_dtypes())
 
-# Extract cast/grown columns
-cast_cols = []
-grown_cols = []
+# Extract cast/growth columns
+per_turn_cols = []
 total_cols = []
 for player in ['user', 'oppo']:
   for turn in range(1, 31):
-    cast_col = f'{player}_turn_{turn}_berserkers_cast'
-    df[cast_col] = df[f'{player}_turn_{turn}_creatures_cast'].str.count('75119').fillna(value=0)
-    cast_cols.append(cast_col)
+    berserker_cast_col = f'{player}_turn_{turn}_berserkers_cast'
+    df[berserker_cast_col] = df[f'{player}_turn_{turn}_creatures_cast'].str.count('75119').fillna(value=0)
 
-    grown_col = f'{player}_turn_{turn}_berserkers_grown'
-    df[grown_col] = df[f'{player}_turn_{turn}_abilities'].str.count('139923').fillna(value=0)
-    grown_cols.append(grown_col)
+    berserker_growth_col = f'{player}_turn_{turn}_berserkers_growth'
+    df[berserker_growth_col] = df[f'{player}_turn_{turn}_abilities'].str.count('139923').fillna(value=0)
+
+    per_turn_cols.extend([
+      berserker_cast_col,
+      berserker_growth_col,
+      f'{player}_turn_{turn}_creatures_cast',
+      f'{player}_turn_{turn}_non_creatures_cast',
+      f'{player}_turn_{turn}_instants_sorceries_cast',
+    ])
 
   df[f'{player}_total_berserkers_cast'] = df.filter(regex=f'{player}_.*_berserkers_cast', axis=1).sum(axis=1)
-  df[f'{player}_total_berserkers_grown'] = df.filter(regex=f'{player}_.*_berserkers_grown', axis=1).sum(axis=1)
-  total_cols.extend([f'{player}_total_berserkers_cast', f'{player}_total_berserkers_grown'])
+  df[f'{player}_total_berserkers_growth'] = df.filter(regex=f'{player}_.*_berserkers_growth', axis=1).sum(axis=1)
+  total_cols.extend([f'{player}_total_berserkers_cast', f'{player}_total_berserkers_growth'])
 
-df2 = df[list(dtypes.BASE_COLS.keys()) + cast_cols + grown_cols + total_cols]
+df2 = df[list(dtypes.BASE_COLS.keys()) + per_turn_cols + total_cols]
 df2.to_csv(args.out, index=False)
