@@ -111,5 +111,5 @@ for player in ['user']:
 
     growth = pd.DataFrame(growth_spells, index=['count']).transpose().join(card_data[['name', 'cmc']])
     growth = growth.sort_values('count', ascending=False)
-    print(f'Spells triggering berserker grown in {color} ({summary.loc[color]["num_growth_events"]} growth events):')
+    print(f'Spells triggering berserker growth in {color} ({summary.loc[color]["num_growth_events"]} growth events):')
     print(growth.head(10))
